@@ -1,0 +1,67 @@
+@startuml
+|클라이언트|
+start
+:대화명 입력;
+:서버에 연결 요청;
+:대화명 전송;
+
+if (닉네임 중복?) then (예)
+  :오류 메시지 수신;
+  stop
+else (아니오)
+  :입장 메시지 수신;
+endif
+
+fork
+  :메시지 입력;
+  if (특별 명령어?) then (예)
+    if (닉네임 변경?) then (예)
+      :/rename 명령어 전송;
+      :변경 결과 수신;
+    else if (귓속말?) then (예)
+      :/to 명령어 전송;
+      :귓속말 수신;
+    else if (이미지 전송?) then (예)
+      :/img 명령어 전송;
+      :이미지 데이터 전송;
+      :서버로부터 이미지 전송 알림 수신;
+    else if (파일 다운로드?) then (예)
+      :/download 명령어 전송;
+      :파일 수신;
+    else if (사용자 목록 요청?) then (예)
+      :/users 명령어 전송;
+      :사용자 목록 수신;
+    else if (로그 요청?) then (예)
+      :/logs 명령어 전송;
+      :로그 수신;
+    else
+      :기타 명령어 처리;
+    endif
+  else (아니오)
+    :일반 메시지 전송;
+  endif
+  repeat
+    :메시지 입력 대기;
+  repeat while (종료 명령어가 아닐 때)
+fork again
+  :서버로부터 메시지 수신;
+  if (파일 전송 메시지?) then (예)
+    :파일 정보 수신;
+    :파일 데이터 수신 및 저장;
+    :다운로드 완료 메시지 출력;
+  else
+    :메시지 출력;
+  endif
+  :프롬프트 재표시;
+fork again
+  :사용자 입력 처리;
+end fork
+
+if (종료 명령어 입력?) then (예)
+  :quit 명령어 전송;
+  :연결 종료 처리;
+  stop
+else
+  stop
+endif
+@enduml
